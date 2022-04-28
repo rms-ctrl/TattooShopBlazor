@@ -1,0 +1,87 @@
+﻿@page "/mokejimas/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naują mokėjimo įrašą</h3>
+<br />
+<EditForm Model="@mokejimasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="Data"> Mokėjimo data </label>
+        <InputText id="Data" @bind-Value="mokejimasModel.Data" placeholder="pvz. 2022-10-02"></InputText>
+        <label for="Suma"> Suma </label>
+        <InputNumber id="Suma" @bind-Value="mokejimasModel.Suma" placeholder="pvz. 100"></InputNumber>
+        <label for="idMokejimas"> Mokėjimo Id </label>
+        <InputNumber id="idMokejimas" @bind-Value="mokejimasModel.pk_MokejimasId" placeholder="pvz. 547896"></InputNumber>
+        <label for="SaskaitosId"> Saskaitos Id </label>
+        <InputSelect id="SaskaitosId" @bind-Value="mokejimasModel.fk_SaskaitaId">
+            @foreach (var sask in SaskaitosId)
+            {
+                <option value="@sask.pk_SaskaitaId">@sask.pk_SaskaitaId</option>
+            }
+        </InputSelect>
+        <label for="KlientoTel"> Kliento Tel. Nr. </label>
+        <InputSelect id="KlientoTel" @bind-Value="mokejimasModel.fk_KlientasTelNr">
+            @foreach (var telnr in KlientoId)
+            {
+                <option value="@telnr.pk_TelNr">@telnr.pk_TelNr</option>
+            }
+        </InputSelect>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+
+@code {
+    MokejimasModel mokejimasModel = new MokejimasModel();
+    List<SaskaitaModel> SaskaitosId = new List<SaskaitaModel>();
+    List<KlientasModel> KlientoId = new List<KlientasModel>();
+
+    private void Insert()
+    {
+        string sql =
+        "insert into mokėjimas (data, suma, id_MOKĖJIMAS, fk_SĄSKAITAid_SĄSKAITA , fk_KLIENTASTelNr) values (?Data, ?Suma, ?pk_MokejimasId, ?fk_SaskaitaId, ?fk_KlientasTelNr)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?Data", MySqlDbType.VarChar).Value = mokejimasModel.Data;
+            args.Add("?Suma", MySqlDbType.VarChar).Value = mokejimasModel.Suma;
+            args.Add("?pk_MokejimasId", MySqlDbType.VarChar).Value = mokejimasModel.pk_MokejimasId;
+            args.Add("?fk_SaskaitaId", MySqlDbType.VarChar).Value = mokejimasModel.fk_SaskaitaId;
+            args.Add("?fk_KlientasTelNr", MySqlDbType.VarChar).Value = mokejimasModel.fk_KlientasTelNr;
+        });
+        NavigationManager.NavigateTo("/mokejimas/create", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from sąskaita";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            SaskaitosId.Add(new SaskaitaModel
+                {
+                    Data = Convert.ToString(item["data"]),
+                    Kaina = Convert.ToInt32(item["kaina"]),
+                    Arbatpinigiai = Convert.ToInt32(item["Arbatpinigiai"]),
+                    pk_SaskaitaId = Convert.ToInt32(item["id_SĄSKAITA"]),
+                    fk_UzsakymasTelNr = Convert.ToString(item["fk_UZSAKYMAStelNr"]),
+                });
+        }
+
+        string sql2 = "select * from klientas";
+        var dt2 = _data.Query(sql2, _config.GetConnectionString("default"));
+        foreach( DataRow item2 in dt2)
+        {
+            KlientoId.Add(new KlientasModel
+                {
+                    pk_TelNr = Convert.ToString(item2["TelNr"]),
+                    Vardas = Convert.ToString(item2["Vardas"]),
+                    Pavarde = Convert.ToString(item2["Pavardė"]),
+                    GimimoData = Convert.ToString(item2["gimimoData"]),
+                    ElPastas = Convert.ToString(item2["elPastas"]),
+                    Alergijos = Convert.ToInt32(item2["alergijos"]),
+                });
+        }
+    }
+}

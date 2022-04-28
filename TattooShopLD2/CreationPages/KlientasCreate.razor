@@ -1,0 +1,45 @@
+﻿@page "/klientas/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naują kliento įrašą</h3>
+<br />
+<EditForm Model="@klientasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="TelNr"> Telefono numeris </label>
+        <InputText id="TelNr" @bind-Value="klientasModel.pk_TelNr" placeholder="pvz. +3706658712"></InputText>
+        <label for="Vardas"> Vardas </label>
+        <InputText id="Vardas" @bind-Value="klientasModel.Vardas" placeholder="pvz. Tadas"></InputText>
+        <label for="Pavarde"> Pavardė </label>
+        <InputText id="Pavarde" @bind-Value="klientasModel.Pavarde" placeholder="pvz. Abraitis"></InputText>
+        <label for="GimimoData"> Gimimo data </label>
+        <InputText id="GimimoData" @bind-Value="klientasModel.GimimoData" placeholder="pvz. 2001-10-02"></InputText>
+        <label for="ElPastas"> Elektroninis paštas </label>
+        <InputText id="ElPastas" @bind-Value="klientasModel.ElPastas" placeholder="pvz. gintaroimone@gmail.com"></InputText>
+        <label for="Alergijos"> Ar turi klientas alergijų? </label>
+        <InputNumber id="Alergijos" @bind-Value="klientasModel.Alergijos" placeholder="pvz. 1"></InputNumber>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+
+@code {
+    KlientasModel klientasModel = new KlientasModel();
+    private void Insert()
+    {
+        string sql =
+        "insert into klientas (telNr, Vardas, Pavardė, gimimoData, elPastas, alergijos) values (?pk_TelNr, ?Vardas, ?Pavarde, ?GimimoData, ?ElPastas, ?Alergijos)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = klientasModel.pk_TelNr;
+            args.Add("?Vardas", MySqlDbType.VarChar).Value = klientasModel.Vardas;
+            args.Add("?Pavarde", MySqlDbType.VarChar).Value = klientasModel.Pavarde;
+            args.Add("?GimimoData", MySqlDbType.VarChar).Value = klientasModel.GimimoData;
+            args.Add("?ElPastas", MySqlDbType.VarChar).Value = klientasModel.ElPastas;
+            args.Add("?Alergijos", MySqlDbType.Int32).Value = klientasModel.Alergijos;
+        });
+        NavigationManager.NavigateTo("/klientas/create", true);
+    }
+}

@@ -1,0 +1,107 @@
+﻿@page "/darbokainos/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naujus darbo kainos įrašus</h3>
+<br />
+<EditForm Model="@darnokainaModel">
+    <div class="form-group row col-md-10"> 
+        <div class="col-md-2">
+            <label for="kaina"> Kaina </label>
+            <InputNumber id="kaina" @bind-Value="darnokainaModel.pk_Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="DarboId"> Darbo Id </label>
+            <InputSelect id="DarboId" @bind-Value="darnokainaModel.fk_DarbasId">
+                @foreach (var darb in DarboId)
+                {
+                    <option value="@darb.pk_DarbasId">@darb.pk_DarbasId</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<EditForm Model="@darnokainaModel2">
+    <div class="form-group row col-md-10"> 
+        <div class="col-md-2">
+            <label for="kaina1"> Kaina </label>
+            <InputNumber id="kaina1" @bind-Value="darnokainaModel2.pk_Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="DarboId1"> Darbo Id </label>
+            <InputSelect id="DarboId1" @bind-Value="darnokainaModel2.fk_DarbasId">
+                @foreach (var darb in DarboId)
+                {
+                    <option value="@darb.pk_DarbasId">@darb.pk_DarbasId</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<EditForm Model="@darnokainaModel3">
+    <div class="form-group row col-md-10"> 
+        <div class="col-md-2">
+            <label for="kaina2"> Kaina </label>
+            <InputNumber id="kaina2" @bind-Value="darnokainaModel3.pk_Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="DarboId2"> Darbo Id </label>
+            <InputSelect id="DarboId2" @bind-Value="darnokainaModel3.fk_DarbasId">
+                @foreach (var darb in DarboId)
+                {
+                    <option value="@darb.pk_DarbasId">@darb.pk_DarbasId</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+
+@code {
+    DarboKainaModel darnokainaModel = new DarboKainaModel();
+    DarboKainaModel darnokainaModel2 = new DarboKainaModel();
+    DarboKainaModel darnokainaModel3 = new DarboKainaModel();
+    List<DarbasModel> DarboId = new List<DarbasModel>();
+
+    private void Insert()
+    {
+        string sql =
+        "insert into darbo_kaina (kaina, fk_DARBASid_DARBAS) values (?pk_Kaina, ?fk_DarbasId)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?pk_Kaina", MySqlDbType.Int32).Value = darnokainaModel.pk_Kaina;
+            args.Add("?fk_DarbasId", MySqlDbType.Int32).Value = darnokainaModel.fk_DarbasId;
+        });
+         DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?pk_Kaina", MySqlDbType.Int32).Value = darnokainaModel2.pk_Kaina;
+            args.Add("?fk_DarbasId", MySqlDbType.Int32).Value = darnokainaModel2.fk_DarbasId;
+        });
+         DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?pk_Kaina", MySqlDbType.Int32).Value = darnokainaModel3.pk_Kaina;
+            args.Add("?fk_DarbasId", MySqlDbType.Int32).Value = darnokainaModel3.fk_DarbasId;
+        });
+        NavigationManager.NavigateTo("/darbokainos/create", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from darbas";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            DarboId.Add(new DarbasModel
+                {
+                    PraleistasLaikasVal = Convert.ToInt32(item["praleistasLaikasValandomis"]),
+                    AntgaliuSk = Convert.ToInt32(item["reikalinguAntgaliuSk"]),
+                    AtspausdintuPvzSk = Convert.ToInt32(item["atspausdintuPvzSk"]),
+                    SpalvuSk = Convert.ToInt32(item["spalvuSk"]),
+                    pk_DarbasId = Convert.ToInt32(item["id_DARBAS"]),
+                });
+        }
+    }
+}

@@ -1,0 +1,92 @@
+﻿@page "/tatstudijos"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Tattoo studijos</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (tatstudijos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Pavadinimas </th>
+            <th> Adresas </th>
+            <th> Telefono Nr. </th>
+            <th> El. Paštas </th>
+            <th> Vietų Sk. </th>
+            <th> Tattoo studijos Id </th>
+            <th> Miesto Id </th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in tatstudijos)
+        {
+            <tr>
+                <td>@p.Pavadinimas</td>
+                <td>@p.Adresas</td>
+                <td>@p.TelNr</td>
+                <td>@p.ElPastas</td>
+                <td>@p.VietuSk</td>
+                <td>@p.pk_TattooStudijaId</td>
+                <td>@p.fk_MiestasId</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_TattooStudijaId))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<TattooStudijaModel> tatstudijos = new List<TattooStudijaModel>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from tattoo_studija";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            tatstudijos.Add(new TattooStudijaModel
+                {
+                    Pavadinimas = Convert.ToString(item["pavadinimas"]),
+                    Adresas = Convert.ToString(item["adresas"]),
+                    TelNr = Convert.ToString(item["telNr"]),
+                    ElPastas = Convert.ToString(item["elPastas"]),
+                    VietuSk = Convert.ToInt32(item["vietuSk"]),
+                    pk_TattooStudijaId = Convert.ToInt32(item["id_TATTOO_STUDIJA"]),
+                    fk_MiestasId = Convert.ToInt32(item["fk_MIESTASid_MIESTAS"]),
+                });
+        }
+    }
+
+    private void Delete(int id)
+    {
+        string sql = "delete from `tattoo_studija` where id_TATTOO_STUDIJA=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/tatstudijos", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/tatstudijos/create");
+    }
+
+    private void RedirectEdit()
+    {
+        NavigationManager.NavigateTo("/tatstudijos/edit");
+    }
+
+}

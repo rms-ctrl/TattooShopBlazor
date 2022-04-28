@@ -1,0 +1,67 @@
+﻿@page "/uzsakymai/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naują įrašą</h3>
+<br />
+<EditForm Model="@uzsakymasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="TelNr"> Susisiekimo Tel. Nr. </label>
+        <InputText id="TelNr" @bind-Value="uzsakymasModel.pk_TelNr" placeholder="pvz. +3706658712"></InputText>
+        <label for="Vardas"> Vardas </label>
+        <InputText id="Vardas" @bind-Value="uzsakymasModel.Vardas" placeholder="pvz. Tadas"></InputText>
+        <label for="Pavarde"> Pavardė </label>
+        <InputText id="Pavarde" @bind-Value="uzsakymasModel.Pavarde" placeholder="pvz. Abraitis"></InputText>
+        <label for="Spalvota"> Ar spalvota? </label>
+        <InputNumber id="Spalvota" @bind-Value="uzsakymasModel.ArSpalvota" placeholder="pvz. 1"></InputNumber>
+        <label for="Kaina"> Galutinė kaina </label>
+        <InputNumber id="Kaina" @bind-Value="uzsakymasModel.GalutineKaina" placeholder="pvz. 500"></InputNumber>
+        <label for="TattooStilius"> Tattoo stilius </label>
+        <InputText id="TattooStilius" @bind-Value="uzsakymasModel.TattooStilius" placeholder="pvz. Matissian"></InputText>
+        <label for="Nuskausminamieji"> Nuskausminamieji </label>
+        <InputNumber id="Nuskausminamieji" @bind-Value="uzsakymasModel.Nuskausminamieji" placeholder="pvz. 1"></InputNumber>
+        <label for="KunoVieta"> Kūno vieta </label>
+        <InputText id="KunoVieta" @bind-Value="uzsakymasModel.KunoVieta" placeholder="pvz. Nugara"></InputText>
+        <label for="tatDydis"> Tattoo dydis </label>
+        <InputText id="tatDydis" @bind-Value="uzsakymasModel.TattooDydis" placeholder="pvz. Didelė"></InputText>
+        <label for="UzsakymoBusena"> Užsakymo būsena </label>
+        <InputText id="UzsakymoBusena" @bind-Value="uzsakymasModel.UzsakymoBusena" placeholder="pvz. Užsakyta"></InputText>
+        <label for="UzsakymoData"> Užsakymo data </label>
+        <InputText id="UzsakymoData" @bind-Value="uzsakymasModel.UzsakymoData" placeholder="pvz. 2022-01-20"></InputText>
+        <label for="Klientonr"> Kliento Tel. Nr. </label>
+        <InputText id="Klientonr" @bind-Value="uzsakymasModel.fk_KlientasTelNr" placeholder="pvz. +3706658712"></InputText>
+        <label for="TattooMeistronr"> Tattoo meistro Tel. Nr. </label>
+        <InputText id="TattooMeistronr" @bind-Value="uzsakymasModel.fk_TattooMeistrasTelNr" placeholder="pvz. +3706658712"></InputText>
+
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+
+@code {
+    UzsakymasModel uzsakymasModel = new UzsakymasModel();
+    private void Insert()
+    {
+        string sql =
+        "insert into uzsakymas (telNr, Vardas, Pavardė, arSpalvota, galutineKaina, tattooStilius, nuskausminamieji, kunoVieta, tatDydis, užsakymoBūsena, uzsakymoData, fk_KLIENTASTelNr, fk_TATUIRUOČIŲ_MEISTRAStelNr) values (?pk_TelNr, ?Vardas, ?Pavarde, ?ArSpalvota, ?GalutineKaina, ?TattooStilius, ?Nuskausminamieji, ?KunoVieta, ?TattooDydis, ?UzsakymoBusena, ?UzsakymoData, ?fk_KlientasTelNr, ?fk_TattooMeistrasTelNr)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = uzsakymasModel.pk_TelNr;
+            args.Add("?Vardas", MySqlDbType.VarChar).Value = uzsakymasModel.Vardas;
+            args.Add("?Pavarde", MySqlDbType.VarChar).Value = uzsakymasModel.Pavarde;
+            args.Add("?ArSpalvota", MySqlDbType.Int32).Value = uzsakymasModel.ArSpalvota;
+            args.Add("?GalutineKaina", MySqlDbType.Int32).Value = uzsakymasModel.GalutineKaina;
+            args.Add("?TattooStilius", MySqlDbType.VarChar).Value = uzsakymasModel.TattooStilius;
+            args.Add("?Nuskausminamieji", MySqlDbType.Int32).Value = uzsakymasModel.Nuskausminamieji;
+            args.Add("?KunoVieta", MySqlDbType.VarChar).Value = uzsakymasModel.KunoVieta;
+            args.Add("?TattooDydis", MySqlDbType.VarChar).Value = uzsakymasModel.TattooDydis;
+            args.Add("?UzsakymoBusena", MySqlDbType.VarChar).Value = uzsakymasModel.UzsakymoBusena;
+            args.Add("?UzsakymoData", MySqlDbType.VarChar).Value = uzsakymasModel.UzsakymoData;
+            args.Add("?fk_KlientasTelNr", MySqlDbType.VarChar).Value = uzsakymasModel.fk_KlientasTelNr;
+            args.Add("?fk_TattooMeistrasTelNr", MySqlDbType.VarChar).Value = uzsakymasModel.fk_TattooMeistrasTelNr;
+        });
+        NavigationManager.NavigateTo("/uzsakymai");
+    }
+}

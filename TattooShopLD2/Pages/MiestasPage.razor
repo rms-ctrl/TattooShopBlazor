@@ -1,0 +1,79 @@
+﻿@page "/miestai"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Miestų sąrašas</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (miestai == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Pavadinimas </th>
+            <th> Didmiestis </th>
+            <th> Miesto ID </th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in miestai)
+        {
+            <tr>
+                <td>@p.Pavadinimas</td>
+                <td>@p.Didmiestis</td>
+                <td>@p.pk_MiestasId</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_MiestasId))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<MiestasModel> miestai = new List<MiestasModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from miestas";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            miestai.Add(new MiestasModel
+                {
+                    Pavadinimas = Convert.ToString(item["pavadinimas"]),
+                    Didmiestis = Convert.ToInt32(item["didmiestis"]),
+                    pk_MiestasId = Convert.ToInt32(item["id_MIESTAS"])
+                });
+        }
+    }
+
+    private void Delete(int id)
+    {
+        string sql = "delete from `miestas` where id_MIESTAS=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/miestai", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/miestai/create");
+    }
+
+    private void RedirectEdit()
+    {
+        NavigationManager.NavigateTo("/miestai/edit");
+    }
+
+}

@@ -1,0 +1,160 @@
+﻿@page "/saskaitos/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naujus saskaitos įrašus</h3>
+<br />
+<EditForm Model="@saskaitaModel">
+    <div class="form-group row col-md-12"> 
+        <div class="col-md-2">
+            <label for="data"> Data </label>
+            <InputText id="data" @bind-Value="saskaitaModel.Data" placeholder="pvz. 2022-10-02"></InputText>
+        </div>
+        <div class="col-md-2">
+            <label for="kaina"> Kaina </label>
+            <InputNumber id="kaina" @bind-Value="saskaitaModel.Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="arbata"> Arbatpinigiai </label>
+            <InputNumber id="arbata" @bind-Value="saskaitaModel.Arbatpinigiai" placeholder="pvz. 20"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="saskId"> Sąskaitos Id </label>
+            <InputNumber id="saskId" @bind-Value="saskaitaModel.pk_SaskaitaId" placeholder="pvz. 125347"></InputNumber>
+        </div>
+        <div class="col-md-4">
+            <label for="UzsTelNr"> Užsakymo Tel. Nr. </label>
+            <InputSelect id="UzsTelNr" @bind-Value="saskaitaModel.fk_UzsakymasTelNr">
+                @foreach (var tel in uzsakymoTelNr)
+                {
+                    <option value="@tel.pk_TelNr">@tel.pk_TelNr</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<EditForm Model="@saskaitaModel2">
+    <div class="form-group row col-md-12"> 
+        <div class="col-md-2">
+            <label for="data1"> Data </label>
+            <InputText id="data1" @bind-Value="saskaitaModel2.Data" placeholder="pvz. 2022-10-02"></InputText>
+        </div>
+        <div class="col-md-2">
+            <label for="kaina1"> Kaina </label>
+            <InputNumber id="kaina1" @bind-Value="saskaitaModel2.Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="arbata1"> Arbatpinigiai </label>
+            <InputNumber id="arbata1" @bind-Value="saskaitaModel2.Arbatpinigiai" placeholder="pvz. 20"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="saskId1"> Sąskaitos Id </label>
+            <InputNumber id="saskId1" @bind-Value="saskaitaModel2.pk_SaskaitaId" placeholder="pvz. 125347"></InputNumber>
+        </div>
+        <div class="col-md-4">
+            <label for="UzsTelNr1"> Užsakymo Tel. Nr. </label>
+            <InputSelect id="UzsTelNr1" @bind-Value="saskaitaModel2.fk_UzsakymasTelNr">
+                @foreach (var tel in uzsakymoTelNr)
+                {
+                    <option value="@tel.pk_TelNr">@tel.pk_TelNr</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<EditForm Model="@saskaitaModel3">
+    <div class="form-group row col-md-12"> 
+        <div class="col-md-2">
+            <label for="data2"> Data </label>
+            <InputText id="data2" @bind-Value="saskaitaModel3.Data" placeholder="pvz. 2022-10-02"></InputText>
+        </div>
+        <div class="col-md-2">
+            <label for="kaina2"> Kaina </label>
+            <InputNumber id="kaina2" @bind-Value="saskaitaModel3.Kaina" placeholder="pvz. 500"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="arbata2"> Arbatpinigiai </label>
+            <InputNumber id="arbata2" @bind-Value="saskaitaModel3.Arbatpinigiai" placeholder="pvz. 20"></InputNumber>
+        </div>
+        <div class="col-md-2">
+            <label for="saskId2"> Sąskaitos Id </label>
+            <InputNumber id="saskId2" @bind-Value="saskaitaModel3.pk_SaskaitaId" placeholder="pvz. 125347"></InputNumber>
+        </div>
+        <div class="col-md-4">
+            <label for="UzsTelNr2"> Užsakymo Tel. Nr. </label>
+            <InputSelect id="UzsTelNr2" @bind-Value="saskaitaModel3.fk_UzsakymasTelNr">
+                @foreach (var tel in uzsakymoTelNr)
+                {
+                    <option value="@tel.pk_TelNr">@tel.pk_TelNr</option>
+                }
+            </InputSelect>
+        </div>
+     </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+
+@code {
+    SaskaitaModel saskaitaModel = new SaskaitaModel();
+    SaskaitaModel saskaitaModel2 = new SaskaitaModel();
+    SaskaitaModel saskaitaModel3 = new SaskaitaModel();
+    List<UzsakymasModel> uzsakymoTelNr = new List<UzsakymasModel>();
+
+    private void Insert()
+    {
+        string sql =
+        "insert into sąskaita (data, kaina, Arbatpinigiai, id_SĄSKAITA, fk_UZSAKYMAStelNr) values (?Data, ?Kaina, ?Arbatpinigiai, ?pk_SaskaitaId, ?fk_UzsakymasTelNr)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?Data", MySqlDbType.VarChar).Value = saskaitaModel.Data;
+            args.Add("?Kaina", MySqlDbType.Int32).Value = saskaitaModel.Kaina;
+            args.Add("?Arbatpinigiai", MySqlDbType.Int32).Value = saskaitaModel.Arbatpinigiai;
+            args.Add("?pk_SaskaitaId", MySqlDbType.Int32).Value = saskaitaModel.pk_SaskaitaId;
+            args.Add("?fk_UzsakymasTelNr", MySqlDbType.VarChar).Value = saskaitaModel.fk_UzsakymasTelNr;
+        });
+         DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?Data", MySqlDbType.VarChar).Value = saskaitaModel2.Data;
+            args.Add("?Kaina", MySqlDbType.Int32).Value = saskaitaModel2.Kaina;
+            args.Add("?Arbatpinigiai", MySqlDbType.Int32).Value = saskaitaModel2.Arbatpinigiai;
+            args.Add("?pk_SaskaitaId", MySqlDbType.Int32).Value = saskaitaModel2.pk_SaskaitaId;
+            args.Add("?fk_UzsakymasTelNr", MySqlDbType.VarChar).Value = saskaitaModel2.fk_UzsakymasTelNr;
+        });
+         DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?Data", MySqlDbType.VarChar).Value = saskaitaModel3.Data;
+            args.Add("?Kaina", MySqlDbType.Int32).Value = saskaitaModel3.Kaina;
+            args.Add("?Arbatpinigiai", MySqlDbType.Int32).Value = saskaitaModel3.Arbatpinigiai;
+            args.Add("?pk_SaskaitaId", MySqlDbType.Int32).Value = saskaitaModel3.pk_SaskaitaId;
+            args.Add("?fk_UzsakymasTelNr", MySqlDbType.VarChar).Value = saskaitaModel3.fk_UzsakymasTelNr;
+        });
+        NavigationManager.NavigateTo("/saskaitos/create", true);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from uzsakymas";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            uzsakymoTelNr.Add(new UzsakymasModel
+                {
+                    pk_TelNr = Convert.ToString(item["telNr"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    ArSpalvota = Convert.ToInt32(item["arSpalvota"]),
+                    GalutineKaina = Convert.ToInt32(item["galutineKaina"]),
+                    TattooStilius = Convert.ToString(item["tattooStilius"]),
+                    Nuskausminamieji = Convert.ToInt32(item["nuskausminamieji"]),
+                    KunoVieta = Convert.ToString(item["kunoVieta"]),
+                    TattooDydis = Convert.ToString(item["tatDydis"]),
+                    UzsakymoBusena = Convert.ToString(item["užsakymoBūsena"]),
+                    UzsakymoData = Convert.ToString(item["uzsakymoData"]),
+                    fk_KlientasTelNr = Convert.ToString(item["fk_KLIENTASTelNr"]),
+                    fk_TattooMeistrasTelNr = Convert.ToString(item["fk_TATUIRUOČIŲ_MEISTRAStelNr"]),
+                });
+        }
+    }
+}

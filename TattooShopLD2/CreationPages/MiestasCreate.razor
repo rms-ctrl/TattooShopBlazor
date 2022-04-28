@@ -1,0 +1,35 @@
+﻿@page "/miestai/create"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sukurti naują įrašą</h3>
+<br />
+<EditForm Model="@miestasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="pavadinimas"> Pavadinimas </label>
+        <InputText id="pavadinimas" @bind-Value="miestasModel.Pavadinimas" placeholder="pvz. Kaunas"></InputText>
+        <label for="didmiestis"> Didmiestis </label>
+        <InputNumber id="didmiestis" @bind-Value="miestasModel.Didmiestis" placeholder="pvz. 1"></InputNumber>
+        <label for="Id"> Miesto Id </label>
+        <InputNumber id="Id" @bind-Value="miestasModel.pk_MiestasId" placeholder="pvz. 5024"></InputNumber>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Insert">Sukurti naują įrašą</button>
+@code {
+    MiestasModel miestasModel = new MiestasModel();
+    private void Insert()
+    {
+        string sql =
+        "insert into miestas (pavadinimas, didmiestis, id_MIESTAS) values (?Pavadinimas, ?Didmiestis, ?pk_MiestasId)";
+        DataAccessMySql.Insert(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?Pavadinimas", MySqlDbType.VarChar).Value = miestasModel.Pavadinimas;
+            args.Add("?Didmiestis", MySqlDbType.Int32).Value = miestasModel.Didmiestis;
+            args.Add("?pk_MiestasId", MySqlDbType.Int32).Value = miestasModel.pk_MiestasId;
+        });
+        NavigationManager.NavigateTo("/miestai");
+    }
+}

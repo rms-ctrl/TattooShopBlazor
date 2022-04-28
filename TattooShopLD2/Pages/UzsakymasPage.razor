@@ -1,0 +1,110 @@
+﻿@page "/uzsakymai"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Užsakymai</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (uzsakymai == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Susisiekimo Tel. Nr. </th>
+            <th> Vardas </th>
+            <th> Pavardė </th>
+            <th> Ar Spalvota? </th>
+            <th> Galutinė kaina </th>
+            <th> Tattoo stilius </th>
+            <th> Nuskausminamieji </th>
+            <th> Kūno vieta </th>
+            <th> Tattoo dydis</th>
+            <th> Užsakymo būsena</th>
+            <th> Užsakymo data</th>
+            <th> Kliento Tel. Nr.</th>
+            <th> Tattoo meistro Tel. Nr.</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in uzsakymai)
+        {
+            <tr>
+                <td>@p.pk_TelNr</td>
+                <td>@p.Vardas</td>
+                <td>@p.Pavarde</td>
+                <td>@p.ArSpalvota</td>
+                <td>@p.GalutineKaina</td>
+                <td>@p.TattooStilius</td>
+                <td>@p.Nuskausminamieji</td>
+                <td>@p.KunoVieta</td>
+                <td>@p.TattooDydis</td>
+                <td>@p.UzsakymoBusena</td>
+                <td>@p.UzsakymoData</td>
+                <td>@p.fk_KlientasTelNr</td>
+                <td>@p.fk_TattooMeistrasTelNr</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_TelNr))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<UzsakymasModel> uzsakymai = new List<UzsakymasModel>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from uzsakymas";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            uzsakymai.Add(new UzsakymasModel
+                {
+                    pk_TelNr = Convert.ToString(item["telNr"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    ArSpalvota = Convert.ToInt32(item["arSpalvota"]),
+                    GalutineKaina = Convert.ToInt32(item["galutineKaina"]),
+                    TattooStilius = Convert.ToString(item["tattooStilius"]),
+                    Nuskausminamieji = Convert.ToInt32(item["nuskausminamieji"]),
+                    KunoVieta = Convert.ToString(item["kunoVieta"]),
+                    TattooDydis = Convert.ToString(item["tatDydis"]),
+                    UzsakymoBusena = Convert.ToString(item["užsakymoBūsena"]),
+                    UzsakymoData = Convert.ToString(item["uzsakymoData"]),
+                    fk_KlientasTelNr = Convert.ToString(item["fk_KLIENTASTelNr"]),
+                    fk_TattooMeistrasTelNr = Convert.ToString(item["fk_TATUIRUOČIŲ_MEISTRAStelNr"]),
+                });
+        }
+    }
+
+    private void Delete(string id)
+    {
+        string sql = "delete from `uzsakymas` where telNr=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.VarChar).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/uzsakymai", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/uzsakymai/create");
+    }
+
+    private void RedirectEdit()
+    {
+        NavigationManager.NavigateTo("/uzsakymai/edit");
+    }
+
+}
