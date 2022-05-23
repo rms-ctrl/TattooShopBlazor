@@ -1,0 +1,76 @@
+﻿@page "/darbokainos"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Darbo kainų sąrašas</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (darbokainamodel == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Kaina </th>
+            <th> Darbo Id </th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in darbokainamodel)
+        {
+            <tr>
+                <td>@p.pk_Kaina</td>
+                <td>@p.fk_DarbasId</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_Kaina))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_Kaina))">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<DarboKainaModel> darbokainamodel = new List<DarboKainaModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from darbo_kaina";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            darbokainamodel.Add(new DarboKainaModel
+                {
+                    pk_Kaina = Convert.ToInt32(item["kaina"]),
+                    fk_DarbasId = Convert.ToInt32(item["fk_DARBASid_DARBAS"]),
+                });
+        }
+    }
+
+    private void Delete(double id)
+    {
+        string sql = "delete from `darbo_kaina` where kaina=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/darbokainos", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/darbokainos/create");
+    }
+
+    private void RedirectEdit(double id)
+    {
+        NavigationManager.NavigateTo($"/darbokainos/edit/{id}");
+    }
+
+}

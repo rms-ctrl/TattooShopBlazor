@@ -1,4 +1,4 @@
-﻿@page "/klientas/create"
+﻿@page "/klientai/create"
 
 @inject DataAccessMySql _data
 @inject IConfiguration _config
@@ -40,6 +40,6 @@
             args.Add("?ElPastas", MySqlDbType.VarChar).Value = klientasModel.ElPastas;
             args.Add("?Alergijos", MySqlDbType.Int32).Value = klientasModel.Alergijos;
         });
-        NavigationManager.NavigateTo("/klientas/create", true);
+        NavigationManager.NavigateTo("/klientai", true);
     }
 }

@@ -1,0 +1,68 @@
+﻿@page "/saskaitos/edit/{id}"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Sąskaitos redagavimas</h3>
+<br />
+<EditForm Model="@saskaitosModel">
+    <div class="form-group row col-md-4"> 
+        <label for="data"> Data </label>
+        <InputText id="data" @bind-Value="saskaitosModel.Data" placeholder="@placeHldr.Data"></InputText>
+        <label for="kaina"> Kaina </label>
+        <InputNumber id="kaina" @bind-Value="saskaitosModel.Kaina" placeholder="@placeHldr.Kaina"></InputNumber>
+        <label for="arbata"> Arbatpinigiai </label>
+        <InputNumber id="arbata" @bind-Value="saskaitosModel.Arbatpinigiai" placeholder="@placeHldr.Arbatpinigiai"></InputNumber>
+		<label for="pk"> Sąskaitos Id </label>
+        <InputNumber id="pk" @bind-Value="saskaitosModel.pk_SaskaitaId" placeholder="@placeHldr.pk_SaskaitaId"></InputNumber>
+		<label for="fk"> Užsakymo Tel. Nr. </label>
+        <InputText id="fk" @bind-Value="saskaitosModel.fk_UzsakymasTelNr" placeholder="@placeHldr.fk_UzsakymasTelNr"></InputText>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
+@code {
+
+	SaskaitaModel saskaitosModel = new SaskaitaModel();
+	SaskaitaModel placeHldr = new SaskaitaModel();
+
+    [Parameter]
+    public string id { get; set; }
+	public void Update()
+	{						
+		string sql = "update `sąskaita` set data=?Data, kaina=?Kaina, Arbatpinigiai=?Arbatpinigiai, fk_UZSAKYMAStelNr =?fk_UzsakymasTelNr where id_SĄSKAITA =?pk_SaskaitaId";
+				
+		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+			args.Add("?Data", MySqlDbType.VarChar).Value = saskaitosModel.Data;
+			args.Add("?Kaina", MySqlDbType.Int32).Value = saskaitosModel.Kaina;
+			args.Add("?Arbatpinigiai", MySqlDbType.Int32).Value = saskaitosModel.Arbatpinigiai;
+			args.Add("?pk_SaskaitaId", MySqlDbType.Int32).Value = saskaitosModel.pk_SaskaitaId;
+			args.Add("?fk_UzsakymasTelNr", MySqlDbType.VarChar).Value = saskaitosModel.fk_UzsakymasTelNr;
+		});		
+		NavigationManager.NavigateTo("/sąskaitos");
+	}
+
+	List<SaskaitaModel> saskaitos = new List<SaskaitaModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from sąskaita where id_SĄSKAITA=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = Convert.ToInt32(id);
+        });
+        foreach( DataRow item in dt)
+        {
+            saskaitos.Add(new SaskaitaModel
+                {
+                    Data = Convert.ToString(item["data"]),
+                    Kaina = Convert.ToInt32(item["kaina"]),
+                    Arbatpinigiai = Convert.ToInt32(item["Arbatpinigiai"]),
+                    pk_SaskaitaId = Convert.ToInt32(item["id_SĄSKAITA"]),
+                    fk_UzsakymasTelNr = Convert.ToString(item["fk_UZSAKYMAStelNr"]),
+                });
+        }
+        placeHldr=saskaitos[0];
+    }
+}

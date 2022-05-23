@@ -1,0 +1,73 @@
+﻿@page "/klientai/edit/{id}"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Kliento redagavimas</h3>
+<br />
+<EditForm Model="@klientasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="TelNr"> Telefono numeris </label>
+        <InputText id="TelNr" @bind-Value="klientasModel.pk_TelNr" placeholder="@placeHldr.pk_TelNr"></InputText>
+        <label for="Vardas"> Vardas </label>
+        <InputText id="Vardas" @bind-Value="klientasModel.Vardas" placeholder="@placeHldr.Vardas"></InputText>
+        <label for="Pavarde"> Pavardė </label>
+        <InputText id="Pavarde" @bind-Value="klientasModel.Pavarde" placeholder="@placeHldr.Pavarde"></InputText>
+        <label for="GimimoData"> Gimimo data </label>
+        <InputText id="GimimoData" @bind-Value="klientasModel.GimimoData" placeholder="@placeHldr.GimimoData"></InputText>
+        <label for="ElPastas"> Elektroninis paštas </label>
+        <InputText id="ElPastas" @bind-Value="klientasModel.ElPastas" placeholder="@placeHldr.ElPastas"></InputText>
+        <label for="Alergijos"> Ar turi klientas alergijų? </label>
+        <InputNumber id="Alergijos" @bind-Value="klientasModel.Alergijos" placeholder="@placeHldr.Alergijos"></InputNumber>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Update">Redaguoti</button>
+
+@code {
+    KlientasModel klientasModel = new KlientasModel();
+
+    KlientasModel placeHldr = new KlientasModel();
+    [Parameter]
+    public string id { get; set; }
+
+    public void Update()
+    {						
+        string sql = "update `klientas` set Vardas=?Vardas, Pavardė=?Pavarde, gimimoData=?GimimoData, elPastas=?ElPastas, alergijos=?Alergijos where TelNr=?pk_TelNr";
+
+        DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+            args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = klientasModel.pk_TelNr;
+            args.Add("?Vardas", MySqlDbType.VarChar).Value = klientasModel.Vardas;
+            args.Add("?Pavarde", MySqlDbType.VarChar).Value = klientasModel.Pavarde;
+            args.Add("?GimimoData", MySqlDbType.VarChar).Value = klientasModel.GimimoData;
+            args.Add("?ElPastas", MySqlDbType.VarChar).Value = klientasModel.ElPastas;
+            args.Add("?Alergijos", MySqlDbType.Int32).Value = klientasModel.Alergijos;
+        });		
+        NavigationManager.NavigateTo("/klientai");
+    }
+
+    List<KlientasModel> klientai = new List<KlientasModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from klientas where TelNr=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.VarChar).Value = id;
+        });
+        foreach( DataRow item in dt)
+        {
+            klientai.Add(new KlientasModel
+                {
+                    pk_TelNr = Convert.ToString(item["TelNr"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    GimimoData = Convert.ToString(item["gimimoData"]),
+                    ElPastas = Convert.ToString(item["elPastas"]),
+                    Alergijos = Convert.ToInt32(item["alergijos"])
+                });
+        }
+        placeHldr = klientai[0];
+    }
+}

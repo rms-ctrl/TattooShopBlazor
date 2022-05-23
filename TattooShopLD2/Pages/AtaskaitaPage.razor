@@ -1,0 +1,154 @@
+﻿@page "/ataskaita"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+
+<br />
+<EditForm Model="@patirtiesMetaiNuo" hidden="@IsShow">
+    <h3>Įveskite ataskaitos apribojimus</h3>
+    <div class="form-group row col-md-4"> 
+        <label for="patirtiesMetai"> Nuo kiek patirties metų </label>
+        <InputNumber id="patirtiesMetai" @bind-Value="patirtiesMetaiNuo"></InputNumber>   
+    </div>
+</EditForm>
+<EditForm Model="@vietuSkNuo" hidden="@IsShow">
+    <div class="form-group row col-md-4"> 
+        <label for="vietuSk"> Nuo kokio vietų skaičiaus </label>
+        <InputNumber id="vietuSk" @bind-Value="vietuSkNuo"></InputNumber>       
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="ShowLentele" hidden="@IsShow" >Patvirtinti apribojimus</button>
+
+@if (ataskaitos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <h1 hidden="@IsShowLentele">Rūšiuojama nuo '@patirtiesMetaiNuo' patirties metų ir nuo '@vietuSkNuo' vietų skaičiaus. </h1>
+    <table class="table table-striped table-dark table-sm" hidden="@IsShowLentele">
+        <thead class>
+            <th> Miesto pavadinimas </th>
+            <th> Vardas </th>
+            <th> Pavardė </th>
+            <th> Patirties metai </th>
+            <th> Vietų skaičius </th>
+            <th> Tattoo studijos Id (Didėjančiai)</th>
+        </thead>
+        <tbody>
+        @foreach (var p in ataskaitos)
+        {
+            <tr>
+                <td>@p.Pavadinimas</td>
+                <td>@p.Vardas</td>
+                <td>@p.Pavarde</td>
+                <td>@p.PatirtiesMetai</td>
+                <td>@p.VietuSk</td>
+                <td>@p.TattooStudijosId</td>
+            </tr>
+        }
+        <tr>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>Patirties m. vidurkis: @metuVidurkis</td>
+                <td></td>
+                <td>Studijų skaičius: @tsSkaicius</td>
+            </tr>
+        </tbody>
+    </table>
+}
+@code {
+    List<AtaskaitaModel> ataskaitos = new List<AtaskaitaModel>();
+
+    int patirtiesMetaiNuo = 0;
+    int vietuSkNuo = 0;
+    private bool IsShow { get; set; } = false;
+    private bool IsShowLentele { get; set; } = true;
+    int tsSkaicius = 0;
+    double metuVidurkis = 0;
+    private void ShowLentele()
+    {
+        IsShow = !IsShow;
+        IsShowLentele = !IsShowLentele;
+
+        string sql = $@"SELECT 
+                        ms.pavadinimas,
+                        tatm.Vardas,
+                        tatm.Pavardė,
+                        tatm.PatirtiesMetai,
+                        ts.vietuSk,
+                        ts.id_TATTOO_STUDIJA                       
+                      FROM
+                        tattoo_studija ts
+                        INNER JOIN tatuiruočių_meistras tatm ON tatm.fk_TATTOO_STUDIJAid_TATTOO_STUDIJA = ts.id_TATTOO_STUDIJA
+                        LEFT JOIN miestas ms ON ms.id_MIESTAS = ts.fk_MIESTASid_MIESTAS
+                      WHERE
+                        tatm.PatirtiesMetai >= IFNULL(?nuo, tatm.PatirtiesMetai)
+                        AND ts.vietuSk >= IFNULL(?nuo2, ts.vietuSk)
+                      ORDER BY
+                        ts.id_TATTOO_STUDIJA ASC, tatm.PatirtiesMetai ASC";
+
+
+
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?nuo", MySqlDbType.Int32).Value = patirtiesMetaiNuo;
+            args.Add("?nuo2", MySqlDbType.Int32).Value = vietuSkNuo;
+        });
+
+
+
+        foreach (DataRow item in dt)
+        {
+            ataskaitos.Add(new AtaskaitaModel
+                {
+                    Pavadinimas = Convert.ToString(item["pavadinimas"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    PatirtiesMetai = Convert.ToInt32(item["PatirtiesMetai"]),
+                    VietuSk = Convert.ToInt32(item["vietuSk"]),
+                    TattooStudijosId = Convert.ToInt32(item["id_TATTOO_STUDIJA"])
+                });
+
+        }
+
+        string sql2 = $@"SELECT 
+                        COUNT(ts.id_TATTOO_STUDIJA) as tsSkaicius,
+                        ROUND(AVG(tatm.PatirtiesMetai),2) as metuVidurkis
+                      FROM
+                        tattoo_studija ts
+                        INNER JOIN tatuiruočių_meistras tatm ON tatm.fk_TATTOO_STUDIJAid_TATTOO_STUDIJA = ts.id_TATTOO_STUDIJA
+                        LEFT JOIN miestas ms ON ms.id_MIESTAS = ts.fk_MIESTASid_MIESTAS
+                      WHERE
+                        tatm.PatirtiesMetai >= IFNULL(?nuo, tatm.PatirtiesMetai)
+                        AND ts.vietuSk >= IFNULL(?nuo2, ts.vietuSk)
+                      ORDER BY
+                        ts.id_TATTOO_STUDIJA ASC, ms.pavadinimas";
+
+        var dt2 = _data.Query(sql2, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?nuo", MySqlDbType.Int32).Value = patirtiesMetaiNuo;
+            args.Add("?nuo2", MySqlDbType.Int32).Value = vietuSkNuo;
+        });
+
+
+
+        foreach (DataRow item in dt2)
+        {
+            tsSkaicius = Convert.ToInt32(item["tsSkaicius"]);
+            metuVidurkis = Convert.ToDouble(item["metuVidurkis"]);
+        }
+        
+    }
+
+    private void Show()
+    {
+        IsShow = !IsShow;
+    }
+
+
+}

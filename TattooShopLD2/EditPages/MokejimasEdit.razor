@@ -1,0 +1,69 @@
+﻿@page "/mokejimai/edit/{id}"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Mokėjimų redagavimas</h3>
+<br />
+<EditForm Model="@mokejimasModel">
+    <div class="form-group row col-md-4"> 
+        <label for="Data"> Pavadinimas </label>
+        <InputText id="Data" @bind-Value="mokejimasModel.Data" placeholder="@placeHldr.Data" ></InputText>
+        <label for="Suma"> Didmiestis </label>
+        <InputNumber id="Suma" @bind-Value="mokejimasModel.Suma" placeholder="@placeHldr.Suma" ></InputNumber>
+        <label for="pk_MokejimasId"> Miesto Id </label>
+        <InputNumber id="pk_MokejimasId" @bind-Value="mokejimasModel.pk_MokejimasId" placeholder="@placeHldr.pk_MokejimasId"></InputNumber>
+		<label for="fk_SaskaitaId"> Miesto Id </label>
+        <InputNumber id="fk_SaskaitaId" @bind-Value="mokejimasModel.fk_SaskaitaId" placeholder="@placeHldr.fk_SaskaitaId"></InputNumber>
+		<label for="fk_KlientasTelNr"> Miesto Id </label>
+        <InputText id="fk_KlientasTelNr" @bind-Value="mokejimasModel.fk_KlientasTelNr" placeholder="@placeHldr.fk_KlientasTelNr"></InputText>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
+@code {
+
+	MokejimasModel mokejimasModel = new MokejimasModel();
+    MokejimasModel placeHldr = new MokejimasModel();
+
+    [Parameter]
+    public string id { get; set; }
+
+	public void Update()
+	{						
+		string sql = "update `mokėjimas` set data=?Data, suma=?Suma, fk_SĄSKAITAid_SĄSKAITA=?fk_SaskaitaId, fk_KLIENTASTelNr=?fk_KlientasTelNr where id_MOKĖJIMAS=?pk_MokejimasId";
+				
+		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+			args.Add("?Data", MySqlDbType.VarChar).Value = mokejimasModel.Data;
+			args.Add("?Suma", MySqlDbType.Int32).Value = mokejimasModel.Suma;
+			args.Add("?pk_MokejimasId", MySqlDbType.Int32).Value = mokejimasModel.pk_MokejimasId;
+			args.Add("?fk_SaskaitaId", MySqlDbType.Int32).Value = mokejimasModel.fk_SaskaitaId;
+			args.Add("?fk_KlientasTelNr", MySqlDbType.VarChar).Value = mokejimasModel.fk_KlientasTelNr;
+		});		
+		NavigationManager.NavigateTo("/mokejimai");
+	}
+
+	List<MokejimasModel> mokejimai = new List<MokejimasModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from mokėjimas where id_MOKĖJIMAS=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = Convert.ToInt32(id);
+        });
+        foreach( DataRow item in dt)
+        {
+            mokejimai.Add(new MokejimasModel
+                {
+                    Data = Convert.ToString(item["data"]),
+                    Suma = Convert.ToInt32(item["suma"]),
+                    pk_MokejimasId = Convert.ToInt32(item["id_MOKĖJIMAS"]),
+                    fk_SaskaitaId = Convert.ToInt32(item["fk_SĄSKAITAid_SĄSKAITA"]),
+                    fk_KlientasTelNr = Convert.ToString(item["fk_KLIENTASTelNr"]),
+                });
+        }
+        placeHldr = mokejimai[0];
+    }
+}

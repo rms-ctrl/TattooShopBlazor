@@ -1,4 +1,4 @@
-﻿@page "/uzsakymai/edit"
+﻿@page "/uzsakymai/edit/{id}"
 
 @inject DataAccessMySql _data
 @inject IConfiguration _config
@@ -7,47 +7,49 @@
 <h3>Užsakymų redagavimas</h3>
 <br />
 <EditForm Model="@uzsakymasModel">
-    <div class="form-group row"> 
+    <div class="form-group row col-md-4"> 
         <label for="TelNr"> Susisiekimo Tel. Nr. </label>
-        <InputText id="TelNr" @bind-Value="uzsakymasModel.pk_TelNr" placeholder="pvz. +3706658712"></InputText>
+        <InputText id="TelNr" @bind-Value="uzsakymasModel.pk_TelNr" placeholder="@placeHldr.pk_TelNr"></InputText>
         <label for="Vardas"> Vardas </label>
-        <InputText id="Vardas" @bind-Value="uzsakymasModel.Vardas" placeholder="pvz. Tadas"></InputText>
+        <InputText id="Vardas" @bind-Value="uzsakymasModel.Vardas" placeholder="@placeHldr.Vardas"></InputText>
         <label for="Pavarde"> Pavardė </label>
-        <InputText id="Pavarde" @bind-Value="uzsakymasModel.Pavarde" placeholder="pvz. Abraitis"></InputText>
+        <InputText id="Pavarde" @bind-Value="uzsakymasModel.Pavarde" placeholder="@placeHldr.Pavarde"></InputText>
         <label for="Spalvota"> Ar spalvota? </label>
-        <InputNumber id="Spalvota" @bind-Value="uzsakymasModel.ArSpalvota" placeholder="pvz. 1"></InputNumber>
+        <InputNumber id="Spalvota" @bind-Value="uzsakymasModel.ArSpalvota" placeholder="@placeHldr.ArSpalvota"></InputNumber>
         <label for="Kaina"> Galutinė kaina </label>
-        <InputNumber id="Kaina" @bind-Value="uzsakymasModel.GalutineKaina" placeholder="pvz. 500"></InputNumber>
+        <InputNumber id="Kaina" @bind-Value="uzsakymasModel.GalutineKaina" placeholder="@placeHldr.GalutineKaina"></InputNumber>
         <label for="TattooStilius"> Tattoo stilius </label>
-        <InputText id="TattooStilius" @bind-Value="uzsakymasModel.TattooStilius" placeholder="pvz. Matissian"></InputText>
+        <InputText id="TattooStilius" @bind-Value="uzsakymasModel.TattooStilius" placeholder="@placeHldr.TattooStilius"></InputText>
         <label for="Nuskausminamieji"> Nuskausminamieji </label>
-        <InputNumber id="Nuskausminamieji" @bind-Value="uzsakymasModel.Nuskausminamieji" placeholder="pvz. 1"></InputNumber>
+        <InputNumber id="Nuskausminamieji" @bind-Value="uzsakymasModel.Nuskausminamieji" placeholder="@placeHldr.Nuskausminamieji"></InputNumber>
         <label for="KunoVieta"> Kūno vieta </label>
-        <InputText id="KunoVieta" @bind-Value="uzsakymasModel.KunoVieta" placeholder="pvz. Nugara"></InputText>
+        <InputText id="KunoVieta" @bind-Value="uzsakymasModel.KunoVieta" placeholder="@placeHldr.KunoVieta"></InputText>
         <label for="tatDydis"> Tattoo dydis </label>
-        <InputText id="tatDydis" @bind-Value="uzsakymasModel.TattooDydis" placeholder="pvz. Didelė"></InputText>
+        <InputText id="tatDydis" @bind-Value="uzsakymasModel.TattooDydis" placeholder="@placeHldr.TattooDydis"></InputText>
         <label for="UzsakymoBusena"> Užsakymo būsena </label>
-        <InputText id="UzsakymoBusena" @bind-Value="uzsakymasModel.UzsakymoBusena" placeholder="pvz. Užsakyta"></InputText>
+        <InputText id="UzsakymoBusena" @bind-Value="uzsakymasModel.UzsakymoBusena" placeholder="@placeHldr.UzsakymoBusena"></InputText>
         <label for="UzsakymoData"> Užsakymo data </label>
-        <InputText id="UzsakymoData" @bind-Value="uzsakymasModel.UzsakymoData" placeholder="pvz. 2022-01-20"></InputText>
+        <InputText id="UzsakymoData" @bind-Value="uzsakymasModel.UzsakymoData" placeholder="@placeHldr.UzsakymoData"></InputText>
         <label for="Klientonr"> Kliento Tel. Nr. </label>
-        <InputText id="Klientonr" @bind-Value="uzsakymasModel.fk_KlientasTelNr" placeholder="pvz. +3706658712"></InputText>
+        <InputText id="Klientonr" @bind-Value="uzsakymasModel.fk_KlientasTelNr" placeholder="@placeHldr.fk_KlientasTelNr"></InputText>
         <label for="TattooMeistronr"> Tattoo meistro Tel. Nr. </label>
-        <InputText id="TattooMeistronr" @bind-Value="uzsakymasModel.fk_TattooMeistrasTelNr" placeholder="pvz. +3706658712"></InputText>
+        <InputText id="TattooMeistronr" @bind-Value="uzsakymasModel.fk_TattooMeistrasTelNr" placeholder="@placeHldr.fk_TattooMeistrasTelNr"></InputText>
     </div>
 </EditForm>
 <br/>
 <button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
 @code {
 
-	UzsakymasModel uzsakymasModel = new UzsakymasModel();
+    UzsakymasModel uzsakymasModel = new UzsakymasModel();
+    UzsakymasModel placeHldr = new UzsakymasModel();
+    [Parameter]
+    public string id { get; set; }
+    public void Update()
+    {						
+        string sql = "update `uzsakymas` set Vardas=?Vardas, Pavardė = ?Pavarde, arSpalvota = ?ArSpalvota, galutineKaina = ?GalutineKaina, tattooStilius = ?TattooStilius, nuskausminamieji = ?Nuskausminamieji, kunoVieta = ?KunoVieta, tatDydis = ?TattooDydis, užsakymoBūsena = ?UzsakymoBusena, uzsakymoData = ?UzsakymoData, fk_KLIENTASTelNr = ?fk_KlientasTelNr, fk_TATUIRUOČIŲ_MEISTRAStelNr  = ?fk_TattooMeistrasTelNr where telNr=?pk_TelNr";
 
-	public void Update()
-	{						
-		string sql = "update `uzsakymas` set Vardas=?Vardas, Pavardė = ?Pavarde, arSpalvota = ?ArSpalvota, galutineKaina = ?GalutineKaina, tattooStilius = ?TattooStilius, nuskausminamieji = ?Nuskausminamieji, kunoVieta = ?KunoVieta, tatDydis = ?TattooDydis, užsakymoBūsena = ?UzsakymoBusena, uzsakymoData = ?UzsakymoData, fk_KLIENTASTelNr = ?fk_KlientasTelNr, fk_TATUIRUOČIŲ_MEISTRAStelNr  = ?fk_TattooMeistrasTelNr where telNr=?pk_TelNr";
-				
-		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
-			args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = uzsakymasModel.pk_TelNr;
+        DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+            args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = uzsakymasModel.pk_TelNr;
             args.Add("?Vardas", MySqlDbType.VarChar).Value = uzsakymasModel.Vardas;
             args.Add("?Pavarde", MySqlDbType.VarChar).Value = uzsakymasModel.Pavarde;
             args.Add("?ArSpalvota", MySqlDbType.Int32).Value = uzsakymasModel.ArSpalvota;
@@ -60,7 +62,39 @@
             args.Add("?UzsakymoData", MySqlDbType.VarChar).Value = uzsakymasModel.UzsakymoData;
             args.Add("?fk_KlientasTelNr", MySqlDbType.VarChar).Value = uzsakymasModel.fk_KlientasTelNr;
             args.Add("?fk_TattooMeistrasTelNr", MySqlDbType.VarChar).Value = uzsakymasModel.fk_TattooMeistrasTelNr;
-		});		
-		NavigationManager.NavigateTo("/uzsakymai");
-	}
+        });		
+        NavigationManager.NavigateTo("/uzsakymai");
+    }
+
+    List<UzsakymasModel> uzsakymai = new List<UzsakymasModel>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from uzsakymas where telNr=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.VarChar).Value = id;
+        });
+        foreach( DataRow item in dt)
+        {
+            uzsakymai.Add(new UzsakymasModel
+                {
+                    pk_TelNr = Convert.ToString(item["telNr"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    ArSpalvota = Convert.ToInt32(item["arSpalvota"]),
+                    GalutineKaina = Convert.ToInt32(item["galutineKaina"]),
+                    TattooStilius = Convert.ToString(item["tattooStilius"]),
+                    Nuskausminamieji = Convert.ToInt32(item["nuskausminamieji"]),
+                    KunoVieta = Convert.ToString(item["kunoVieta"]),
+                    TattooDydis = Convert.ToString(item["tatDydis"]),
+                    UzsakymoBusena = Convert.ToString(item["užsakymoBūsena"]),
+                    UzsakymoData = Convert.ToString(item["uzsakymoData"]),
+                    fk_KlientasTelNr = Convert.ToString(item["fk_KLIENTASTelNr"]),
+                    fk_TattooMeistrasTelNr = Convert.ToString(item["fk_TATUIRUOČIŲ_MEISTRAStelNr"]),
+                });
+        }
+        placeHldr = uzsakymai[0];
+    }
 }

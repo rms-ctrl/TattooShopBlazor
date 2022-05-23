@@ -1,4 +1,4 @@
-﻿@page "/miestai/edit"
+﻿@page "/miestai/edit/{id}"
 
 @inject DataAccessMySql _data
 @inject IConfiguration _config
@@ -7,30 +7,58 @@
 <h3>Miesto redagavimas</h3>
 <br />
 <EditForm Model="@miestasModel">
-    <div class="form-group row"> 
+    <div class="form-group row col-md-4"> 
         <label for="pavadinimas"> Pavadinimas </label>
-        <InputText id="pavadinimas" @bind-Value="miestasModel.Pavadinimas" ></InputText>
+        <InputText id="pavadinimas" @bind-Value="miestasModel.Pavadinimas" placeholder="@placeHldr.Pavadinimas">  </InputText>
         <label for="didmiestis"> Didmiestis </label>
-        <InputNumber id="didmiestis" @bind-Value="miestasModel.Didmiestis" ></InputNumber>
+        <InputNumber id="didmiestis" @bind-Value="miestasModel.Didmiestis" placeholder="@placeHldr.Didmiestis"> </InputNumber>
         <label for="Id"> Miesto Id </label>
-        <InputNumber id="Id" @bind-Value="miestasModel.pk_MiestasId" ></InputNumber>
+        <InputNumber id="Id" @bind-Value="miestasModel.pk_MiestasId" placeholder="@placeHldr.pk_MiestasId"> </InputNumber>
     </div>
 </EditForm>
 <br/>
+
 <button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
 @code {
 
-	MiestasModel miestasModel = new MiestasModel();
+    MiestasModel miestasModel = new MiestasModel();
+    MiestasModel placeHldr = new MiestasModel();
+    [Parameter]
+    public string id { get; set; }
 
-	public void Update()
-	{						
-		string sql = "update `miestas` set pavadinimas=?pavadinimas, didmiestis=?didmiestis where id_MIESTAS=?pk_MiestasId";
-				
-		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
-			args.Add("?pavadinimas", MySqlDbType.VarChar).Value = miestasModel.Pavadinimas;
-			args.Add("?didmiestis", MySqlDbType.Int32).Value = miestasModel.Didmiestis;
-			args.Add("?pk_MiestasId", MySqlDbType.Int32).Value = miestasModel.pk_MiestasId;
-		});		
-		NavigationManager.NavigateTo("/miestai");
-	}
+    public void Update()
+    {						
+        string sql = "update `miestas` set pavadinimas=?pavadinimas, didmiestis=?didmiestis where id_MIESTAS=?pk_MiestasId";
+
+        DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+            args.Add("?pavadinimas", MySqlDbType.VarChar).Value = miestasModel.Pavadinimas;
+            args.Add("?didmiestis", MySqlDbType.Int32).Value = miestasModel.Didmiestis;
+            args.Add("?pk_MiestasId", MySqlDbType.Int32).Value = miestasModel.pk_MiestasId;
+        });		
+        NavigationManager.NavigateTo("/miestai");
+    }
+
+    List<MiestasModel> miestai = new List<MiestasModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from miestas where id_MIESTAS=?id";
+
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = Convert.ToInt32(id);
+        });
+
+        foreach( DataRow item in dt)
+        {
+            miestai.Add(new MiestasModel
+                {
+                    Pavadinimas = Convert.ToString(item["pavadinimas"]),
+                    Didmiestis = Convert.ToInt32(item["didmiestis"]),
+                    pk_MiestasId = Convert.ToInt32(item["id_MIESTAS"])
+                });
+        }
+
+        placeHldr = miestai[0];
+    }
 }

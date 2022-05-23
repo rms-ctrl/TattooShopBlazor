@@ -1,4 +1,4 @@
-﻿@page "/tatmeistrai/edit"
+﻿@page "/tatmeistrai/edit/{id}"
 
 @inject DataAccessMySql _data
 @inject IConfiguration _config
@@ -7,42 +7,71 @@
 <h3>Tattoo meistrų redagavimas</h3>
 <br />
 <EditForm Model="@tatmeistrasModel">
-    <div class="form-group row"> 
+    <div class="form-group row col-md-4"> 
         <label for="TelNr"> Telefono numeris </label>
-        <InputText id="TelNr" @bind-Value="tatmeistrasModel.pk_TelNr" placeholder="pvz. +3706658712"></InputText>
+        <InputText id="TelNr" @bind-Value="tatmeistrasModel.pk_TelNr" placeholder="@placeHldr.pk_TelNr"></InputText>
         <label for="Vardas"> Vardas </label>
-        <InputText id="Vardas" @bind-Value="tatmeistrasModel.Vardas" placeholder="pvz. Tadas"></InputText>
+        <InputText id="Vardas" @bind-Value="tatmeistrasModel.Vardas" placeholder="@placeHldr.Vardas"></InputText>
         <label for="Pavarde"> Pavardė </label>
-        <InputText id="Pavarde" @bind-Value="tatmeistrasModel.Pavarde" placeholder="pvz. Abraitis"></InputText>
+        <InputText id="Pavarde" @bind-Value="tatmeistrasModel.Pavarde" placeholder="@placeHldr.Pavarde"></InputText>
         <label for="Patirtis"> Patirties metai </label>
-        <InputNumber id="Patirtis" @bind-Value="tatmeistrasModel.PatirtiesMetai" placeholder="pvz. 4"></InputNumber>
+        <InputNumber id="Patirtis" @bind-Value="tatmeistrasModel.PatirtiesMetai" placeholder="@placeHldr.PatirtiesMetai"></InputNumber>
         <label for="ElPastas"> Elektroninis paštas </label>
-        <InputText id="ElPastas" @bind-Value="tatmeistrasModel.ElPastas" placeholder="pvz. gintaroimone@gmail.com"></InputText>
+        <InputText id="ElPastas" @bind-Value="tatmeistrasModel.ElPastas" placeholder="@placeHldr.ElPastas"></InputText>
         <label for="TattooStilius"> Tattoo stilius </label>
-        <InputText id="TattooStilius" @bind-Value="tatmeistrasModel.TattooStilius" placeholder="pvz. Matissian"></InputText>
+        <InputText id="TattooStilius" @bind-Value="tatmeistrasModel.TattooStilius" placeholder="@placeHldr.TattooStilius"></InputText>
         <label for="Id"> Tattoo studijos Id </label>
-        <InputNumber id="Id" @bind-Value="tatmeistrasModel.fk_TattooStudijaId" placeholder="pvz. 5024"></InputNumber>
+        <InputNumber id="Id" @bind-Value="tatmeistrasModel.fk_TattooStudijaId" placeholder="@placeHldr.fk_TattooStudijaId"></InputNumber>
     </div>
 </EditForm>
 <br/>
 <button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
 @code {
 
-	TattooMeistrasModel tatmeistrasModel = new TattooMeistrasModel();
+    TattooMeistrasModel tatmeistrasModel = new TattooMeistrasModel();
+    TattooMeistrasModel placeHldr = new TattooMeistrasModel();
+    [Parameter]
+    public string id { get; set; }
 
-	public void Update()
-	{						
-		string sql = "update `tatuiruočių_meistras` set Vardas=?Vardas, Pavardė = ?Pavarde, PatirtiesMetai = ?PatirtiesMetai, elPastas = ?ElPastas, tattooStilius = ?TattooStilius, fk_TATTOO_STUDIJAid_TATTOO_STUDIJA = ?fk_TattooStudijaId where telNr=?pk_TelNr";
-				
-		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
-			args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = tatmeistrasModel.pk_TelNr;
+    public void Update()
+    {						
+        string sql = "update `tatuiruočių_meistras` set Vardas=?Vardas, Pavardė = ?Pavarde, PatirtiesMetai = ?PatirtiesMetai, elPastas = ?ElPastas, tattooStilius = ?TattooStilius, fk_TATTOO_STUDIJAid_TATTOO_STUDIJA = ?fk_TattooStudijaId where telNr=?pk_TelNr";
+
+        DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+            args.Add("?pk_TelNr", MySqlDbType.VarChar).Value = tatmeistrasModel.pk_TelNr;
             args.Add("?Vardas", MySqlDbType.VarChar).Value = tatmeistrasModel.Vardas;
             args.Add("?Pavarde", MySqlDbType.VarChar).Value = tatmeistrasModel.Pavarde;
             args.Add("?PatirtiesMetai", MySqlDbType.Int32).Value = tatmeistrasModel.PatirtiesMetai;
             args.Add("?ElPastas", MySqlDbType.VarChar).Value = tatmeistrasModel.ElPastas;
             args.Add("?TattooStilius", MySqlDbType.VarChar).Value = tatmeistrasModel.TattooStilius;
             args.Add("?fk_TattooStudijaId", MySqlDbType.Int32).Value = tatmeistrasModel.fk_TattooStudijaId;
-		});		
-		NavigationManager.NavigateTo("/tatmeistrai");
-	}
+        });		
+        NavigationManager.NavigateTo("/tatmeistrai");
+    }
+
+    List<TattooMeistrasModel> tatmeistrai = new List<TattooMeistrasModel>();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from tatuiruočių_meistras where telNr=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.VarChar).Value = id;
+        });
+        foreach( DataRow item in dt)
+        {
+            tatmeistrai.Add(new TattooMeistrasModel
+                {
+                    pk_TelNr = Convert.ToString(item["telNr"]),
+                    Vardas = Convert.ToString(item["Vardas"]),
+                    Pavarde = Convert.ToString(item["Pavardė"]),
+                    PatirtiesMetai = Convert.ToInt32(item["PatirtiesMetai"]),
+                    ElPastas = Convert.ToString(item["elPastas"]),
+                    TattooStilius = Convert.ToString(item["tattooStilius"]),
+                    fk_TattooStudijaId = Convert.ToInt32(item["fk_TATTOO_STUDIJAid_TATTOO_STUDIJA"]),
+                });
+        }
+        placeHldr = tatmeistrai[0];
+    }
 }

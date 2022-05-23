@@ -6,7 +6,6 @@
 
 <h2>Užsakymai</h2>
 <br />
-<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
 <br />
 <br />
 @if (uzsakymai == null)
@@ -51,7 +50,7 @@ else
                 <td>@p.fk_KlientasTelNr</td>
                 <td>@p.fk_TattooMeistrasTelNr</td>
                 <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_TelNr))">Ištrinti</button></td>
-                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_TelNr))">Redaguoti</button></td>
             </tr>
         }
         </tbody>
@@ -102,9 +101,9 @@ else
         NavigationManager.NavigateTo("/uzsakymai/create");
     }
 
-    private void RedirectEdit()
+    private void RedirectEdit(string id)
     {
-        NavigationManager.NavigateTo("/uzsakymai/edit");
+        NavigationManager.NavigateTo($"/uzsakymai/edit/{id}");
     }
 
 }

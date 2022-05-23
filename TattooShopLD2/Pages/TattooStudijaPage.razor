@@ -6,7 +6,6 @@
 
 <h2>Tattoo studijos</h2>
 <br />
-<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
 <br />
 <br />
 @if (tatstudijos == null)
@@ -39,7 +38,7 @@ else
                 <td>@p.pk_TattooStudijaId</td>
                 <td>@p.fk_MiestasId</td>
                 <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_TattooStudijaId))">Ištrinti</button></td>
-                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_TattooStudijaId))">Redaguoti</button></td>
             </tr>
         }
         </tbody>
@@ -84,9 +83,9 @@ else
         NavigationManager.NavigateTo("/tatstudijos/create");
     }
 
-    private void RedirectEdit()
+    private void RedirectEdit(int id)
     {
-        NavigationManager.NavigateTo("/tatstudijos/edit");
+        NavigationManager.NavigateTo($"/tatstudijos/edit/{id}");
     }
 
 }

@@ -1,0 +1,57 @@
+﻿@page "/darbokainos/edit/{id}"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h3>Darbo kainų redagavimas</h3>
+<br />
+<EditForm Model="@darbokainaModel">
+    <div class="form-group row col-md-4"> 
+        <label for="pk_Kaina"> Kaina </label>
+        <InputNumber id="pk_Kaina" @bind-Value="darbokainaModel.pk_Kaina" placeholder="@placeHldr.pk_Kaina"></InputNumber>
+        <label for="fk_DarbasId"> Darbo Id </label>
+        <InputNumber id="fk_DarbasId" @bind-Value="darbokainaModel.fk_DarbasId" placeholder="@placeHldr.fk_DarbasId"></InputNumber>
+    </div>
+</EditForm>
+<br/>
+<button class="btn btn-primary" @onclick="Update">Redaguoti įrašą</button>
+@code {
+
+	DarboKainaModel darbokainaModel = new DarboKainaModel();
+	DarboKainaModel placeHldr = new DarboKainaModel();
+
+    [Parameter]
+    public string id { get; set; }
+
+	public void Update()
+	{						
+		string sql = "update `darbo_kaina` set kaina=?pk_Kaina where fk_DARBASid_DARBAS=?fk_DarbasId";
+				
+		DataAccessMySql.Update(sql, _config.GetConnectionString("default"), args => {
+			args.Add("?pk_Kaina", MySqlDbType.Int32).Value = darbokainaModel.pk_Kaina;
+			args.Add("?fk_DarbasId", MySqlDbType.Int32).Value = darbokainaModel.fk_DarbasId;
+		});		
+		NavigationManager.NavigateTo("/darbokainos");
+	}
+
+	List<DarboKainaModel> darbokainamodel = new List<DarboKainaModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from darbo_kaina where kaina=?id";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = Convert.ToInt32(id);
+        });
+        foreach( DataRow item in dt)
+        {
+            darbokainamodel.Add(new DarboKainaModel
+                {
+                    pk_Kaina = Convert.ToInt32(item["kaina"]),
+                    fk_DarbasId = Convert.ToInt32(item["fk_DARBASid_DARBAS"]),
+                });
+        }
+        placeHldr = darbokainamodel[0];
+    }
+}
