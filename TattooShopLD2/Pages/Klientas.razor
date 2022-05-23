@@ -1,14 +1,15 @@
-﻿@page "/tatmeistrai"
+﻿@page "/klientai"
 
 @inject DataAccessMySql _data
 @inject IConfiguration _config
 @inject NavigationManager NavigationManager
 
-<h2>Tattoo meistrai</h2>
+<h2>Klientų sąrašas</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
 <br />
 <br />
-<br />
-@if (tatmeistrai == null)
+@if (klientai == null)
 {
     <p><em>Loading...</em></p>
 }
@@ -16,27 +17,25 @@ else
 {
     <table class="table table-striped table-dark table-sm">
         <thead class>
-            <th> Telefono Nr. </th>
+            <th> TelNr </th>
             <th> Vardas </th>
             <th> Pavardė </th>
-            <th> Patirties metai </th>
-            <th> Elektroninis Paštas </th>
-            <th> Tattoo stilius </th>
-            <th> Tattoo studijos Id </th>
+            <th> Gimimo data </th>
+            <th> El. Paštas </th>
+            <th> Alergijos </th>
             <th></th>
             <th></th>
         </thead>
         <tbody>
-        @foreach (var p in tatmeistrai)
+        @foreach (var p in klientai)
         {
             <tr>
                 <td>@p.pk_TelNr</td>
                 <td>@p.Vardas</td>
                 <td>@p.Pavarde</td>
-                <td>@p.PatirtiesMetai</td>
+                <td>@p.GimimoData</td>
                 <td>@p.ElPastas</td>
-                <td>@p.TattooStilius</td>
-                <td>@p.fk_TattooStudijaId</td>
+                <td>@p.Alergijos</td>
                 <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_TelNr))">Ištrinti</button></td>
                 <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_TelNr))">Redaguoti</button></td>
             </tr>
@@ -45,47 +44,45 @@ else
     </table>
 }
 @code {
-    List<TattooMeistrasModel> tatmeistrai = new List<TattooMeistrasModel>();
-
+    List<KlientasModel> klientai = new List<KlientasModel>();
 
     protected override async Task OnInitializedAsync()
     {
-        string sql = "select * from tatuiruočių_meistras";
+        string sql = "select * from klientas";
         var dt = _data.Query(sql, _config.GetConnectionString("default"));
         foreach( DataRow item in dt)
         {
-            tatmeistrai.Add(new TattooMeistrasModel
+            klientai.Add(new KlientasModel
                 {
-                    pk_TelNr = Convert.ToString(item["telNr"]),
+                    pk_TelNr = Convert.ToString(item["TelNr"]),
                     Vardas = Convert.ToString(item["Vardas"]),
                     Pavarde = Convert.ToString(item["Pavardė"]),
-                    PatirtiesMetai = Convert.ToInt32(item["PatirtiesMetai"]),
+                    GimimoData = Convert.ToString(item["gimimoData"]),
                     ElPastas = Convert.ToString(item["elPastas"]),
-                    TattooStilius = Convert.ToString(item["tattooStilius"]),
-                    fk_TattooStudijaId = Convert.ToInt32(item["fk_TATTOO_STUDIJAid_TATTOO_STUDIJA"]),
+                    Alergijos = Convert.ToInt32(item["alergijos"])
                 });
         }
     }
 
     private void Delete(string id)
     {
-        string sql = "delete from `tatuiruočių_meistras` where telNr=?id";
+        string sql = "delete from `klientas` where TelNr=?id";
         DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
         {
             args.Add("?id", MySqlDbType.VarChar).Value = id;
         });
 
-        NavigationManager.NavigateTo("/tatmeistrai", true);
+        NavigationManager.NavigateTo("/klientai", true);
     }
 
     private void Redirect()
     {
-        NavigationManager.NavigateTo("/tatmeistrai/create");
+        NavigationManager.NavigateTo("/klientai/create");
     }
 
     private void RedirectEdit(string id)
     {
-        NavigationManager.NavigateTo($"/tatmeistrai/edit/{id}");
+        NavigationManager.NavigateTo($"/klientai/edit/{id}");
     }
 
 }

@@ -31,7 +31,7 @@ else
                 <td>@p.Didmiestis</td>
                 <td>@p.pk_MiestasId</td>
                 <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_MiestasId))">Ištrinti</button></td>
-                <td><button class="btn btn-primary" @onclick="RedirectEdit">Redaguoti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_MiestasId))">Redaguoti</button></td>
             </tr>
         }
         </tbody>
@@ -71,9 +71,9 @@ else
         NavigationManager.NavigateTo("/miestai/create");
     }
 
-    private void RedirectEdit()
+    private void RedirectEdit(int id)
     {
-        NavigationManager.NavigateTo("/miestai/edit");
+        NavigationManager.NavigateTo($"/miestai/edit/{id}");
     }
 
 }

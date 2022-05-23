@@ -6,27 +6,60 @@
 <h1>Sveiki atvykę į tatuiruočių studijų valdymo sistemą !</h1>
 <br/>
 <div class="row col-md-6">
-    <div class="p-2 mb-1 bg-primary text-white">SF</div>
-    <div class="p-2 mb-1 bg-info text-white">Miestai</div>
-    <div class="p-2 mb-1 bg-info text-white">Tattoo studijos</div>
-    <div class="p-2 mb-1 bg-info text-white">Tattoo meistrai</div>
-    <div class="p-2 mb-1 bg-info text-white">Užsakymai</div>
+    <div class="p-2 mb-1 bg-primary text-white" >SF</div>
+    <div class="p-2 mb-1 bg-info text-white hover-overlay" @onclick="RedirectMiestai">Miestai</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectTatStud">Tattoo studijos</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectTatMeistrai">Tattoo meistrai</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectUzsakymai">Užsakymai</div>
 </div>
 <br/>
 <div class="row col-md-6">
     <div class="p-2 mb-1 bg-primary text-white">PN1</div>
-    <div class="p-2 mb-1 bg-info text-white">Klientai</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectKlientai">Klientai</div>
 </div>
 <br/>
 <div class="row col-md-6">
     <div class="p-2 mb-1 bg-primary text-white">PP1</div>
-    <div class="p-2 mb-1 bg-info text-white">Mokėjimai</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectMokejimai">Mokėjimai</div>
 </div>
 <br/>
 <div class="row col-md-6">
     <div class="p-2 mb-1 bg-primary text-white">PP2</div>
-    <div class="p-2 mb-1 bg-info text-white">Darbo kainos</div>
-    <div class="p-2 mb-1 bg-info text-white">Sąskaitos</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectDarbKainos">Darbo kainos</div>
+    <div class="p-2 mb-1 bg-info text-white" @onclick="RedirectSaskaitos">Sąskaitos</div>
 </div>
 
-
+@code{
+    private void RedirectMiestai()
+    {
+        _nav.NavigateTo("/miestai");
+    }
+    private void RedirectTatStud()
+    {
+        _nav.NavigateTo("/tatstudijos");
+    }
+    private void RedirectTatMeistrai()
+    {
+        _nav.NavigateTo("/tatmeistrai");
+    }
+    private void RedirectUzsakymai()
+    {
+        _nav.NavigateTo("/uzsakymai");
+    }
+    private void RedirectKlientai()
+    {
+        _nav.NavigateTo("/klientai");
+    }
+    private void RedirectMokejimai()
+    {
+        _nav.NavigateTo("/mokejimai");
+    }
+    private void RedirectDarbKainos()
+    {
+        _nav.NavigateTo("/darbokainos");
+    }
+    private void RedirectSaskaitos()
+    {
+        _nav.NavigateTo("/saskaitos");
+    }
+}

@@ -1,0 +1,85 @@
+﻿@page "/saskaitos"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Sąskaitų sąrašas</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (saskaitos == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Data </th>
+            <th> Kaina </th>
+            <th> Arbatpinigiai </th>
+            <th> Sąskaitos Id</th>
+            <th> Užsakymo Tel. Nr.</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in saskaitos)
+        {
+            <tr>
+                <td>@p.Data</td>
+                <td>@p.Kaina</td>
+                <td>@p.Arbatpinigiai</td>
+                <td>@p.pk_SaskaitaId</td>
+                <td>@p.fk_UzsakymasTelNr</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_SaskaitaId))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_SaskaitaId))">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<SaskaitaModel> saskaitos = new List<SaskaitaModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from sąskaita";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            saskaitos.Add(new SaskaitaModel
+                {
+                    Data = Convert.ToString(item["data"]),
+                    Kaina = Convert.ToInt32(item["kaina"]),
+                    Arbatpinigiai = Convert.ToInt32(item["Arbatpinigiai"]),
+                    pk_SaskaitaId = Convert.ToInt32(item["id_SĄSKAITA"]),
+                    fk_UzsakymasTelNr = Convert.ToString(item["fk_UZSAKYMAStelNr"]),
+                });
+        }
+    }
+
+    private void Delete(int id)
+    {
+        string sql = "delete from `sąskaita` where id_SĄSKAITA=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/saskaitos", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/saskaitos/create");
+    }
+
+    private void RedirectEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/saskaitos/edit/{id}");
+    }
+
+}

@@ -1,0 +1,85 @@
+﻿@page "/mokejimai"
+
+@inject DataAccessMySql _data
+@inject IConfiguration _config
+@inject NavigationManager NavigationManager
+
+<h2>Mokėjimų sąrašas</h2>
+<br />
+<button class="btn btn-primary" @onclick="Redirect">Sukurti naują įrašą</button>
+<br />
+<br />
+@if (mokejimai == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table table-striped table-dark table-sm">
+        <thead class>
+            <th> Data </th>
+            <th> Kaina </th>
+            <th> Arbatpinigiai </th>
+            <th> Sąskaitos Id</th>
+            <th> Užsakymo Tel. Nr.</th>
+            <th></th>
+            <th></th>
+        </thead>
+        <tbody>
+        @foreach (var p in mokejimai)
+        {
+            <tr>
+                <td>@p.Data</td>
+                <td>@p.Suma</td>
+                <td>@p.pk_MokejimasId</td>
+                <td>@p.fk_SaskaitaId</td>
+                <td>@p.fk_KlientasTelNr</td>
+                <td><button class="btn btn-danger" @onclick="(() => Delete(p.pk_MokejimasId))">Ištrinti</button></td>
+                <td><button class="btn btn-primary" @onclick="(() => RedirectEdit(p.pk_MokejimasId))">Redaguoti</button></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+@code {
+    List<MokejimasModel> mokejimai = new List<MokejimasModel>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        string sql = "select * from mokėjimas";
+        var dt = _data.Query(sql, _config.GetConnectionString("default"));
+        foreach( DataRow item in dt)
+        {
+            mokejimai.Add(new MokejimasModel
+                {
+                    Data = Convert.ToString(item["data"]),
+                    Suma = Convert.ToInt32(item["suma"]),
+                    pk_MokejimasId = Convert.ToInt32(item["id_MOKĖJIMAS"]),
+                    fk_SaskaitaId = Convert.ToInt32(item["fk_SĄSKAITAid_SĄSKAITA"]),
+                    fk_KlientasTelNr = Convert.ToString(item["fk_KLIENTASTelNr"]),
+                });
+        }
+    }
+
+    private void Delete(int id)
+    {
+        string sql = "delete from `mokėjimas` where id_MOKĖJIMAS=?id";
+        DataAccessMySql.Delete(sql, _config.GetConnectionString("default"), args =>
+        {
+            args.Add("?id", MySqlDbType.Int32).Value = id;
+        });
+
+        NavigationManager.NavigateTo("/mokejimai", true);
+    }
+
+    private void Redirect()
+    {
+        NavigationManager.NavigateTo("/mokejimai/create");
+    }
+
+    private void RedirectEdit(int id)
+    {
+        NavigationManager.NavigateTo($"/mokejimai/edit/{id}");
+    }
+
+}
